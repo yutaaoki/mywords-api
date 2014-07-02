@@ -1,12 +1,11 @@
 require './app/mywords/api'
 require 'rack/test'
+require_relative 'shared_context'
 
 describe MyWords::API do
    include Rack::Test::Methods
+   include_context :api_context
 
-   def app
-     MyWords::API
-   end
 
    describe 'GET' do
      it "returns 200" do
