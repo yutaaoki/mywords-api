@@ -29,5 +29,19 @@ module MyWords
       }
     end
 
+    def self.userThreads(login_user, inboxes)
+      inboxes.select do |e|
+        if e.to && e.to.data
+          e.to.data.each do |data|
+            if data == login_user
+              true
+              break
+            end
+          end
+        end
+        false
+      end
+    end
+
   end
 end

@@ -25,7 +25,7 @@ module MyWords
       end
       get ':login_user' do
         _graph = graph(params[:access_token])
-        allInboxes _graph, params[:login_user]
+        inboxes = allInboxes _graph, params[:login_user]
       end
     end
 
