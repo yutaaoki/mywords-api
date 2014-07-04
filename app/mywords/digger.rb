@@ -12,23 +12,21 @@ module MyWords
 
     def self.allInboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.hour){
-        all = []
+
+        # Fetch the first page
         result = graph.get_connections("me", "inbox")
-        all.push result.first
+
+        # Fetch the next page. We won't fetch more than 
+        # two pages so as not to pass the api limit.
         next_page = result.next_page
+
+        # List of inbox objects
+        all = []
+        all.push result.first
         if next_page
           all.push next_page
         end
       }
-    end
-
-    def self.pages(cur)
-      all = []
-      page = cur.next_page
-      all.push(page)
-      if page.paging
-        all.push(pages(cur))
-      end
     end
 
   end
