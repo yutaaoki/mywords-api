@@ -10,7 +10,8 @@ module MyWords
       Cachy
     end
 
-    MAX_THREADS = 30
+    MAX_COMMENTS = 200
+    MAX_DEPTH = 2
 
     def self.all_inboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.day){
@@ -48,38 +49,61 @@ module MyWords
       end
     end
 
-    def self.expand_threads(graph, threads, login_user)
-      cache.cache("threads"+login_user, :expires_in => 1.day){
-        all_threads = []
-        count = 0
+    def self.all_comments(graph, threads, login_user)
+      cache.cache("comments"+login_user, :expires_in => 1.day){
+        all_comments = []
 
         # Recursively fetch threads
         threads.each do |t|
-          if count >= MAX_THREADS
+          if all_comments.length > MAX_COMMENTS
             break
           end
-          thread = graph.get_objects(t['id'])
-          count += 1
-          threads.concat(thread_recursive threads, thread, count)
+          comments = graph.get_connections(t['id'], 'comments')
+          all_comments = comments_recursive all_comments, comments, login_user, 1
         end
-        return all_threads
+        return all_comments
       }
     end
 
-    def self.thread_recursive(threads, thread, count)
+    #def self.threads_recursive(graph, threads, t_count, all_comments, com_count)
+    #  thread = threads[t_count]
+    #  if thread
+    #      threads_recursive(graph, threads, t_count + 1, all_comments, com_count)
+    ##  end
+    #end
 
-      if count >= MAX_THREADS
-        return []
+    def self.comments_recursive(all_comments, comments, user, depth)
+
+      # Debug
+      puts comments
+      puts depth
+      puts '-----'
+
+      user_comments = comments.select do  |com|
+        if com['from']
+          com ['from']["id"] == user
+        else
+          false
+        end
       end
 
-      puts thread
-      puts '------'
-      next_page = thread.next_page
-      if next_page['id']
-        threads.concat(thread_recursive threads, next_page, count + 1)
+      # Add this page to the array
+      all_comments.concat(user_comments)
+
+      puts all_comments.length
+
+      # Look no further. Return the current array
+      if depth >= MAX_DEPTH || !comments.methods.include?(:next_page)
+        return all_comments
+      end
+
+      next_page = comments.next_page
+      if next_page && !next_page.empty?
+        comments_recursive all_comments, next_page, user, depth + 1
+      else
+        # There's no next page
+        all_comments
       end
     end
-
-
   end
 end
