@@ -10,8 +10,8 @@ module MyWords
       Cachy
     end
 
-    MAX_COMMENTS = 200
-    MAX_DEPTH = 2
+    MAX_COMMENTS = 2000
+    MAX_DEPTH = 30
 
     def self.all_inboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.day){
@@ -49,36 +49,28 @@ module MyWords
       end
     end
 
-    def self.all_comments(graph, threads, login_user)
-      cache.cache("comments"+login_user, :expires_in => 1.day){
-        all_comments = []
+    def self.all_messages(graph, threads, login_user)
+      cache.cache("messages"+login_user, :expires_in => 1.day){
+        all_messages = []
 
         # Recursively fetch threads
         threads.each do |t|
-          if all_comments.length > MAX_COMMENTS
+
+          if all_messages.length > MAX_COMMENTS
             break
           end
+
           comments = graph.get_connections(t['id'], 'comments')
-          all_comments = comments_recursive all_comments, comments, login_user, 1
+          all_messages = comments_recursive all_messages, comments, login_user, 1
         end
-        return all_comments
+
+        all_messages
       }
     end
 
-    #def self.threads_recursive(graph, threads, t_count, all_comments, com_count)
-    #  thread = threads[t_count]
-    #  if thread
-    #      threads_recursive(graph, threads, t_count + 1, all_comments, com_count)
-    ##  end
-    #end
+    def self.comments_recursive(all_messages, comments, user, depth)
 
-    def self.comments_recursive(all_comments, comments, user, depth)
-
-      # Debug
-      puts comments
-      puts depth
-      puts '-----'
-
+      # Filter by user id
       user_comments = comments.select do  |com|
         if com['from']
           com ['from']["id"] == user
@@ -87,22 +79,28 @@ module MyWords
         end
       end
 
-      # Add this page to the array
-      all_comments.concat(user_comments)
-
-      puts all_comments.length
-
-      # Look no further. Return the current array
-      if depth >= MAX_DEPTH || !comments.methods.include?(:next_page)
-        return all_comments
+      # Only keep the message
+      messages = user_comments.map do |com|
+        if com['message']
+          com['message']
+        end
       end
 
+      # Add this page to the array
+      all_messages.concat(messages)
+
+      # There's no further pages
+      if depth >= MAX_DEPTH || !comments.methods.include?(:next_page)
+        return all_messages
+      end
+
+      # There's a next page. Look for it recursively
       next_page = comments.next_page
       if next_page && !next_page.empty?
-        comments_recursive all_comments, next_page, user, depth + 1
+        comments_recursive all_messages, next_page, user, depth + 1
       else
         # There's no next page
-        all_comments
+        all_messages
       end
     end
   end

@@ -8,7 +8,7 @@ describe MyWords::Digger do
   USER_ID = '10204429438402257'
 
   def graph()
-    access_token = 'CAALWvEqTcSMBAJun2opo90IVq1uEWxwueSM2sRZCZCWm8cDJSSRNv9ZAEtY9W9nV7aip1EDCcZCt5vhFcqM9WTUewwMFPJOW77MeNabz2JysBZBXqkpSpfTVxbZBAtylxqjnSVzPPSLZA8dgwwGWtXqsqHGEZAlpz5E4WZCZBD3H28l0bhSiiAAhcfkwV6hZBl6nA0ZD'
+    access_token = 'CAALWvEqTcSMBAPxdaXQK54GjElCynT8k2fAmarFGIndJYpQCV4Fk97BrpZCUdwySilbeiJ9FDUoqknRLpSVEAwq1wQiPctyMT7ZCc49Fjz6SUBeT8goeW3mub3boolE7HWbcrZCwoTfDcHtXVKU3VCFsNxPIbaI2uLgke3ePZAMpZAwBz5bWL4nlFad1a1vAZD'
     Koala::Facebook::API.new access_token, AppConfig::APP_SECRET
   end
 
@@ -47,10 +47,11 @@ describe MyWords::Digger do
     end
   end
 
-  describe 'all_comments' do
-    it 'returns comments' do
-      all_comments = MyWords::Digger::all_comments graph, @user_threads, USER_ID
-      expect(all_comments.empty?).to eq(false)
+  describe 'all_messages' do
+    it 'returns a message array' do
+      all_messages = MyWords::Digger::all_messages graph, @user_threads, USER_ID
+      expect(all_messages.empty?).to eq(false)
+      puts all_messages
     end
   end
 end
