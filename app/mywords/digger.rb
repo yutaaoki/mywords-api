@@ -4,16 +4,19 @@ require 'cachy'
 module MyWords
   module Digger
 
-    def self.cache
+    MAX_COMMENTS = 2000
+    MAX_DEPTH = 30
+
+    module_function
+
+    def cache
       store = Moneta.new :File, dir: 'moneta'
       Cachy.cache_store = store
       Cachy
     end
 
-    MAX_COMMENTS = 2000
-    MAX_DEPTH = 30
 
-    def self.all_inboxes(graph, login_user)
+    def all_inboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.day){
 
         # Fetch the first page
@@ -32,13 +35,13 @@ module MyWords
       }
     end
 
-    def self.thread_array(inboxes)
+    def thread_array(inboxes)
       threads = []
       inboxes.each { |b| threads.concat(b) }
       return threads
     end
 
-    def self.user_threads(login_user, inboxes)
+    def user_threads(login_user, inboxes)
       inboxes.select do |e|
         if e['to'] && e['to']['data']
           contains = e['to']['data'].select { |d| d['id'] == login_user }
@@ -49,7 +52,7 @@ module MyWords
       end
     end
 
-    def self.all_messages(graph, threads, login_user)
+    def all_messages(graph, threads, login_user)
       cache.cache("messages"+login_user, :expires_in => 1.day){
         all_messages = []
 
@@ -68,7 +71,7 @@ module MyWords
       }
     end
 
-    def self.comments_recursive(all_messages, comments, user, depth)
+    def comments_recursive(all_messages, comments, user, depth)
 
       # Filter by user id
       user_comments = comments.select do  |com|

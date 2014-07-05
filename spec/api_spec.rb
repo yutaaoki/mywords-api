@@ -1,5 +1,6 @@
 require './app/mywords/api'
 require 'rack/test'
+require './config'
 require_relative 'shared_context'
 
 describe MyWords::API do
@@ -10,6 +11,13 @@ describe MyWords::API do
      it "returns 200" do
        get '/'
        assert_status(200)
+     end
+   end
+
+   describe 'messages' do
+     it 'returns text' do
+       get 'messages/'+AppConfig::USER_ID+'?access_token='+AppConfig::ACCESS_TOKEN
+       puts last_response.body
      end
    end
 

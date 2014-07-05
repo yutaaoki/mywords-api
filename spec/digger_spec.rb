@@ -8,8 +8,7 @@ describe MyWords::Digger do
   USER_ID = '10204429438402257'
 
   def graph()
-    access_token = 'CAALWvEqTcSMBAPxdaXQK54GjElCynT8k2fAmarFGIndJYpQCV4Fk97BrpZCUdwySilbeiJ9FDUoqknRLpSVEAwq1wQiPctyMT7ZCc49Fjz6SUBeT8goeW3mub3boolE7HWbcrZCwoTfDcHtXVKU3VCFsNxPIbaI2uLgke3ePZAMpZAwBz5bWL4nlFad1a1vAZD'
-    Koala::Facebook::API.new access_token, AppConfig::APP_SECRET
+    Koala::Facebook::API.new AppConfig::ACCESS_TOKEN, AppConfig::APP_SECRET
   end
 
   before(:each) do
@@ -51,7 +50,6 @@ describe MyWords::Digger do
     it 'returns a message array' do
       all_messages = MyWords::Digger::all_messages graph, @user_threads, USER_ID
       expect(all_messages.empty?).to eq(false)
-      puts all_messages
     end
   end
 end

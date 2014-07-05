@@ -1,6 +1,7 @@
 require 'grape'
 require 'koala'
 require './config'
+require_relative 'digger'
 
 module MyWords
   class API < Grape::API
@@ -8,8 +9,9 @@ module MyWords
 
     Koala.config.api_version = "v2.0"
 
+    helpers Digger
     helpers do
-      def graph(access_token)
+      def _graph(access_token)
         Koala::Facebook::API.new access_token, AppConfig::APP_SECRET
       end
     end
@@ -18,14 +20,19 @@ module MyWords
       {message: "mywords api"}
     end
 
-    resource :freqlist do
+    resource :messages do
 
       params do
         requires :access_token, type: String, desc: 'Facebook Access Token'
       end
       get ':login_user' do
-        _graph = graph(params[:access_token])
-        inboxes = allInboxes _graph, params[:login_user]
+        graph = _graph(params[:access_token])
+        user = params[:login_user]
+        inboxes = all_inboxes graph, user
+        threads = thread_array inboxes
+        messages = all_messages graph, threads, user 
+        text = messages.join " "
+        {data: text}
       end
     end
 
