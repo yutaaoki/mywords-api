@@ -10,7 +10,7 @@ module MyWords
       Cachy
     end
 
-    def self.all_inboxes(graph, login_user)
+    def self.allInboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.day){
 
         # Fetch the first page
@@ -22,24 +22,19 @@ module MyWords
 
         # List of inbox objects
         all = []
-        all.push result
+        all.push result.first
         if next_page
           all.push next_page
         end
       }
     end
 
-    def self.thread_array(inboxes)
-      threads = []
-      inboxes.each { |b| threads.concat(b) }
-      threads
-    end
-
-    def self.user_threads(login_user, inboxes)
+    def self.userThreads(login_user, inboxes)
       inboxes.select do |e|
-        if e['to'] && e['to']['data']
-          contains = e['to']['data'].select { |d| d['id'] == login_user }
-          !contains.empty?
+        puts e.kind_of?(Hash)
+        puts e
+        if !e.is_a?(Hash) && e['to'] != nil  && e['to']['data'] != nil
+          e['to']['data'].select { |d| d['id'] == login_user }.empty?
         else
           false
         end
