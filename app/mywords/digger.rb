@@ -3,9 +3,7 @@ require 'cachy'
 
 module MyWords
   module Digger
-
-    MAX_COMMENTS = 2000
-    MAX_DEPTH = 30
+    include AppConfig
 
     module_function
 

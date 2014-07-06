@@ -10,6 +10,7 @@ module MyWords
     Koala.config.api_version = "v2.0"
 
     helpers Digger
+    helpers AppConfig
     helpers do
       def _graph(access_token)
         Koala::Facebook::API.new access_token, AppConfig::APP_SECRET
