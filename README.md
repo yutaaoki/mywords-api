@@ -1,7 +1,7 @@
 mywords-api
 ===========
 
-## Instlattion
+## Installattion
 
 Copy config.rb.sample to config.rb. Edit the file to add necessary information.
 
