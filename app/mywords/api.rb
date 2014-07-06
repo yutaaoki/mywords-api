@@ -17,23 +17,26 @@ module MyWords
       end
     end
 
-    get do
-      {message: "mywords api"}
-    end
+    resource :api do
 
-    resource :messages do
-
-      params do
-        requires :access_token, type: String, desc: 'Facebook Access Token'
+      get do
+        {message: "mywords api"}
       end
-      get ':login_user' do
-        graph = _graph(params[:access_token])
-        user = params[:login_user]
-        inboxes = all_inboxes graph, user
-        threads = thread_array inboxes
-        messages = all_messages graph, threads, user 
-        text = messages.join " "
-        {data: text}
+
+      resource :messages do
+
+        params do
+          requires :access_token, type: String, desc: 'Facebook Access Token'
+        end
+        get ':login_user' do
+          graph = _graph(params[:access_token])
+          user = params[:login_user]
+          inboxes = all_inboxes graph, user
+          threads = thread_array inboxes
+          messages = all_messages graph, threads, user 
+          text = messages.join " "
+          {data: text}
+        end
       end
     end
 
