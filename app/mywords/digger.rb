@@ -1,19 +1,21 @@
 require 'moneta'
 require 'cachy'
 
+# Fetches Facebook data using API
 module MyWords
   module Digger
     include AppConfig
 
     module_function
 
+    # Cache to store Facebook data
     def cache
       store = Moneta.new :File, dir: 'moneta'
       Cachy.cache_store = store
       Cachy
     end
 
-
+    # Fetch user inbox up to two pages
     def all_inboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.day){
 
@@ -21,7 +23,7 @@ module MyWords
         result = graph.get_connections("me", "inbox")
 
         # Fetch the next page. We won't fetch more than 
-        # two pages so as not to pass the api limit.
+        # two pages so as not to reach the api limit.
         next_page = result.next_page
 
         # List of inbox objects
@@ -33,12 +35,17 @@ module MyWords
       }
     end
 
+    # An inbox object is an array of threads.
+    # This method convers an array of arrays into
+    # a single array.
     def thread_array(inboxes)
       threads = []
       inboxes.each { |b| threads.concat(b) }
       return threads
     end
 
+    # Filter out irrelevant threads based on
+    # the user id.
     def user_threads(login_user, inboxes)
       inboxes.select do |e|
         if e['to'] && e['to']['data']
@@ -50,28 +57,37 @@ module MyWords
       end
     end
 
+    # Featch as many messages as allowed by config.
     def all_messages(graph, threads, login_user)
       cache.cache("messages"+login_user, :expires_in => 1.day){
+        # Array of all the messages. This object will contain
+        # the return value at any given time.
         all_messages = []
 
-        # Recursively fetch threads
+        # Process each thread object
         threads.each do |t|
 
+          # We have enough messages now, so stop the loop.
           if all_messages.length > MAX_COMMENTS
             break
           end
 
+          # Fetch the comment object the contains messages
           comments = graph.get_connections(t['id'], 'comments')
           all_messages = comments_recursive all_messages, comments, login_user, 1
         end
 
+        # Return the array of messages
         all_messages
       }
     end
 
+    # Featch comment objects recursively.
+    # A thread contains any number of comment objects
+    # and each comment object contains a message.
     def comments_recursive(all_messages, comments, user, depth)
 
-      # Filter by user id
+      # Filter out irrelevant comments
       user_comments = comments.select do  |com|
         if com['from']
           com ['from']["id"] == user
@@ -80,17 +96,18 @@ module MyWords
         end
       end
 
-      # Only keep the message
+      # Only keep the message string because
+      # a comment object contains other information
       messages = user_comments.map do |com|
         if com['message']
           com['message']
         end
       end
 
-      # Add this page to the array
+      # Add the message to the array
       all_messages.concat(messages)
 
-      # There's no further pages
+      # There's no further pages, so return a message array.
       if depth >= MAX_DEPTH || !comments.methods.include?(:next_page)
         return all_messages
       end
@@ -100,7 +117,7 @@ module MyWords
       if next_page && !next_page.empty?
         comments_recursive all_messages, next_page, user, depth + 1
       else
-        # There's no next page
+        # There's no next page, so return the message array.
         all_messages
       end
     end
