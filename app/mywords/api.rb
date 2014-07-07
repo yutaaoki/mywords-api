@@ -33,11 +33,11 @@ module MyWords
         params do
           requires :access_token, type: String, desc: 'Facebook Access Token'
         end
-        get ':login_user' do
+        get do
           # Create a graph object
-          # This verifies the access token as well
           graph = _graph(params[:access_token])
-          user = params[:login_user]
+          # This will check if access_token is valid
+          user = login_user graph
 
           # Get user inbox up to two pages
           inboxes = all_inboxes graph, user
@@ -51,7 +51,29 @@ module MyWords
           {data: text}
         end
       end
-    end
 
+      resource :friends do
+
+        params do
+          requires :access_token, type: String, desc: 'Facebook Access Token'
+        end
+        get do
+          # Create a graph object
+          graph = _graph(params[:access_token])
+
+          # This will check if access_token is valid
+          user = login_user graph
+
+          # Get user inbox up to two pages
+          inboxes = all_inboxes graph, user
+          threads = thread_array inboxes
+
+          friends = friends_array threads, user
+          # return a unique array of friends
+          friends.uniq{|e| e.id}
+        end
+      end
+    # :api 
+    end
   end
 end

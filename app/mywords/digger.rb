@@ -15,6 +15,23 @@ module MyWords
       Cachy
     end
 
+    def login_user(graph)
+      me = graph.get_object('me')
+      me.id
+    end
+
+    def friends(threads, user)
+      friends = []
+      threads.each do |t|
+        if t.to && t.to.data
+          t.to.data.each do |d|
+            if d.id != user
+              friends.push d
+          end
+        end
+      end
+    end
+
     # Fetch user inbox up to two pages
     def all_inboxes(graph, login_user)
       cache.cache("inbox"+login_user, :expires_in => 1.day){
