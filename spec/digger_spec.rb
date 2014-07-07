@@ -17,6 +17,13 @@ describe MyWords::Digger do
     @user_threads = MyWords::Digger::user_threads USER_ID, @threads
   end
 
+  describe 'login_user' do
+    it 'returns the user id' do
+      user = MyWords::Digger::login_user graph
+      expect(user).to eq(USER_ID)
+    end
+  end
+
   describe 'all_inboxes' do
     it 'returns all the inbox objects' do
       expect(@inboxes.kind_of?(Array)).to eq(true)
@@ -50,6 +57,16 @@ describe MyWords::Digger do
     it 'returns a message array' do
       all_messages = MyWords::Digger::all_messages graph, @user_threads, USER_ID
       expect(all_messages.empty?).to eq(false)
+      expect(all_messages.kind_of?(Array)).to eq(true)
+    end
+  end
+
+  describe 'friends_array' do
+    it 'returns a friend array' do
+      friends = friends_array @user_threads, USER_ID
+      puts friends
+      expect(friends.empty?).to eq(false)
+      expect(friends.kind_of?(Array)).to eq(true)
     end
   end
 end

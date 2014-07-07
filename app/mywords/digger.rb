@@ -17,19 +17,7 @@ module MyWords
 
     def login_user(graph)
       me = graph.get_object('me')
-      me.id
-    end
-
-    def friends(threads, user)
-      friends = []
-      threads.each do |t|
-        if t.to && t.to.data
-          t.to.data.each do |d|
-            if d.id != user
-              friends.push d
-          end
-        end
-      end
+      me['id']
     end
 
     # Fetch user inbox up to two pages
@@ -138,5 +126,20 @@ module MyWords
         all_messages
       end
     end
+
+    def friends_array(threads, user)
+      friends = []
+      threads.each do |t|
+        if t['to'] && t['to']['data']
+          t['to']['data'].each do |d|
+            if d['id'] != user
+              friends.push d
+            end
+          end
+        end
+      end
+      friends.uniq{|e| e['id']}
+    end
+
   end
 end

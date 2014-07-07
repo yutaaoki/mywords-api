@@ -16,7 +16,16 @@ describe MyWords::API do
 
    describe 'messages' do
      it 'returns text' do
-       get 'api/messages/'+AppConfig::USER_ID+'?access_token='+AppConfig::ACCESS_TOKEN
+       get 'api/messages/me?access_token='+AppConfig::ACCESS_TOKEN
+       assert_status(200)
+       puts last_response.body
+     end
+   end
+
+   describe 'friends' do
+     it 'returns text' do
+       get 'api/friends/me?access_token='+AppConfig::ACCESS_TOKEN
+       assert_status(200)
        puts last_response.body
      end
    end
