@@ -87,27 +87,12 @@ module MyWords
       }
     end
 
-    # Featch comment objects recursively.
+    # Fetch comment objects recursively.
     # A thread contains any number of comment objects
     # and each comment object contains a message.
     def comments_recursive(all_messages, comments, user, depth)
 
-      # Filter out irrelevant comments
-      user_comments = comments.select do  |com|
-        if com['from']
-          com ['from']["id"] == user
-        else
-          false
-        end
-      end
-
-      # Only keep the message string because
-      # a comment object contains other information
-      messages = user_comments.map do |com|
-        if com['message']
-          com['message']
-        end
-      end
+      messages = user_messages comments, user
 
       # Add the message to the array
       all_messages.concat(messages)
@@ -117,16 +102,68 @@ module MyWords
         return all_messages
       end
 
-      # There's a next page. Look for it recursively
+      # There're more pages. Look for them recursively
       next_page = comments.next_page
       if next_page && !next_page.empty?
         comments_recursive all_messages, next_page, user, depth + 1
+      else
+        # There's no more page, so return the message array.
+        all_messages
+      end
+    end
+
+    def user_messages(comments, user)
+      # Filter out irrelevant comments
+      user_comments = comments.select do  |com|
+        if com['from']
+          com ['from']["id"] == user
+        else
+          false
+        end
+      end
+      # Only keep the message string because
+      # a comment object contains other information
+      messages = user_comments.map do |com|
+        if com['message']
+          com['message']
+        end
+      end
+    end
+
+    def all_messages_single(graph, thread, users)
+      all_messages = {}
+      comments = graph.get_connections(thread['id'], 'comments')
+      all_messages = comments_recursive_multi all_messages, comments, users, 1
+    end
+
+    # Fetch comment objects recursively.
+    # Store messages for multiple users.
+    def comments_recursive_multi(all_messages, comments, users, depth)
+
+      # Add messages to array
+      users.each do |user|
+        messages = user_messages comments, user
+        # Initialise if nil
+        all_messages[user] ||= []
+        all_messages[user].concat(messages) unless messages.nil? 
+      end
+
+      # There's no further pages, so return a message array.
+      if depth >= MAX_DEPTH_SINGLE || !comments.methods.include?(:next_page)
+        return all_messages
+      end
+
+      # There's a next page. Look for it recursively
+      next_page = comments.next_page
+      if next_page && !next_page.empty?
+        comments_recursive_multi all_messages, next_page, users, depth + 1
       else
         # There's no next page, so return the message array.
         all_messages
       end
     end
 
+    # Array of friend objects that have names and ids
     def friends_array(threads, user)
       friends = []
       threads.each do |t|

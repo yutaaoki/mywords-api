@@ -64,9 +64,19 @@ describe MyWords::Digger do
   describe 'friends_array' do
     it 'returns a friend array' do
       friends = friends_array @user_threads, USER_ID
-      puts friends
+      #puts friends
       expect(friends.empty?).to eq(false)
       expect(friends.kind_of?(Array)).to eq(true)
+    end
+  end
+
+  describe 'comments_recursive_multi' do
+    it 'returns a messages object' do
+      friends = friends_array @user_threads, USER_ID
+      data  = @user_threads[0]['to']['data']
+      users = [data[0]['id'],data[1]['id']]
+      all_messages = MyWords::Digger::all_messages_single graph, @user_threads[0], users
+      puts all_messages
     end
   end
 end
