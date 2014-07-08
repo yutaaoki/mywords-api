@@ -39,6 +39,6 @@ thin start -s1 --socket /tmp/thin.sock
 
 | Resource | Description|
 | ------------- |:-----|
-| GET inbox/:login_user | Inbox for login user |
-| GET api/message/:login_user/:target_user     | Frequency list for a given user |
-| GET api/message/:login_user | Joint messages of a given user. Ready to parse. |
+| GET friends/me | List of friends you have messaged with. |
+| GET api/messages/me | Your messages in a single string. |
+| GET api/messages/me/:login_user | You and your friend's messages in a single string. |
