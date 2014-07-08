@@ -25,7 +25,7 @@ describe MyWords::Digger do
   end
 
   describe 'all_inboxes' do
-    it 'returns all the inbox objects' do
+    it 'returns all the inbox array' do
       expect(@inboxes.kind_of?(Array)).to eq(true)
       @inboxes.each do |box|
         expect(box.kind_of?(Array)).to eq(true)
@@ -54,10 +54,11 @@ describe MyWords::Digger do
   end
 
   describe 'all_messages' do
-    it 'returns a message array' do
+    it 'returns a message hash' do
       all_messages = MyWords::Digger::all_messages graph, @user_threads, USER_ID
       expect(all_messages.empty?).to eq(false)
-      expect(all_messages.kind_of?(Array)).to eq(true)
+      expect(all_messages.kind_of?(Hash)).to eq(true)
+      expect(all_messages[USER_ID].length > 100).to eq(true)
     end
   end
 
@@ -71,12 +72,15 @@ describe MyWords::Digger do
   end
 
   describe 'comments_recursive_multi' do
-    it 'returns a messages object' do
+    it 'returns a messages hash' do
       friends = friends_array @user_threads, USER_ID
       data  = @user_threads[0]['to']['data']
       users = [data[0]['id'],data[1]['id']]
       all_messages = MyWords::Digger::all_messages_single graph, @user_threads[0], users
       puts all_messages
+      expect(all_messages.empty?).to eq(false)
+      expect(all_messages.kind_of?(Hash)).to eq(true)
+      expect(all_messages[USER_ID].length > 100).to eq(true)
     end
   end
 end

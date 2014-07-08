@@ -1,6 +1,7 @@
 require './app/mywords/api'
 require 'rack/test'
 require './config'
+require 'json'
 require_relative 'shared_context'
 
 describe MyWords::API do
@@ -18,7 +19,10 @@ describe MyWords::API do
      it 'returns text' do
        get 'api/messages/me?access_token='+AppConfig::ACCESS_TOKEN
        assert_status(200)
-       puts last_response.body
+       res = last_response.body
+       result = JSON.parse(res)
+       expect(result.kind_of?(Hash)).to eq(true)
+       expect(result[AppConfig::USER_ID].length > 100).to eq(true)
      end
    end
 
@@ -26,7 +30,11 @@ describe MyWords::API do
      it 'returns text' do
        get 'api/friends/me?access_token='+AppConfig::ACCESS_TOKEN
        assert_status(200)
-       puts last_response.body
+       res = last_response.body
+       result = JSON.parse(res)
+       expect(result.kind_of?(Array)).to eq(true)
+       expect(result[0]['id'].nil?).to eq(false)
+       #puts last_response.body
      end
    end
 

@@ -44,11 +44,7 @@ module MyWords
           threads = thread_array inboxes
 
           # Look for user messages in each thread
-          messages = all_messages graph, threads, user 
-
-          # Make a single string
-          text = messages.join " "
-          {data: text}
+          all_messages graph, threads, user 
         end
       end
 

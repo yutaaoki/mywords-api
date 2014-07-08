@@ -67,7 +67,7 @@ module MyWords
       cache.cache("messages"+login_user, :expires_in => 1.day){
         # Array of all the messages. This object will contain
         # the return value at any given time.
-        all_messages = []
+        all_messages = {}
 
         # Process each thread object
         threads.each do |t|
@@ -79,35 +79,52 @@ module MyWords
 
           # Fetch the comment object the contains messages
           comments = graph.get_connections(t['id'], 'comments')
-          all_messages = comments_recursive all_messages, comments, login_user, 1
+          all_messages = comments_recursive all_messages, comments, [login_user], 1, MAX_DEPTH
         end
 
         # Return the array of messages
-        all_messages
+        text_value all_messages
       }
     end
 
+    def text_value(hash)
+      result = {}
+      hash.each do |key, value|
+        result[key] = value.join " "
+      end
+      result
+    end
+
+    def all_messages_single(graph, thread, users)
+      all_messages = {}
+      comments = graph.get_connections(thread['id'], 'comments')
+      all_messages = comments_recursive all_messages, comments, users, 1, MAX_DEPTH_SINGLE
+      text_value all_messages
+    end
+
     # Fetch comment objects recursively.
-    # A thread contains any number of comment objects
-    # and each comment object contains a message.
-    def comments_recursive(all_messages, comments, user, depth)
+    # Store messages for multiple users.
+    def comments_recursive(all_messages, comments, users, depth, max_depth)
 
-      messages = user_messages comments, user
-
-      # Add the message to the array
-      all_messages.concat(messages)
+      # Add messages to array
+      users.each do |user|
+        messages = user_messages comments, user
+        # Initialise if nil
+        all_messages[user] ||= []
+        all_messages[user].concat(messages) unless messages.nil? 
+      end
 
       # There's no further pages, so return a message array.
-      if depth >= MAX_DEPTH || !comments.methods.include?(:next_page)
+      if depth >= max_depth || !comments.methods.include?(:next_page)
         return all_messages
       end
 
-      # There're more pages. Look for them recursively
+      # There's a next page. Look for it recursively
       next_page = comments.next_page
       if next_page && !next_page.empty?
-        comments_recursive all_messages, next_page, user, depth + 1
+        comments_recursive all_messages, next_page, users, depth + 1, max_depth
       else
-        # There's no more page, so return the message array.
+        # There's no next page, so return the message array.
         all_messages
       end
     end
@@ -127,39 +144,6 @@ module MyWords
         if com['message']
           com['message']
         end
-      end
-    end
-
-    def all_messages_single(graph, thread, users)
-      all_messages = {}
-      comments = graph.get_connections(thread['id'], 'comments')
-      all_messages = comments_recursive_multi all_messages, comments, users, 1
-    end
-
-    # Fetch comment objects recursively.
-    # Store messages for multiple users.
-    def comments_recursive_multi(all_messages, comments, users, depth)
-
-      # Add messages to array
-      users.each do |user|
-        messages = user_messages comments, user
-        # Initialise if nil
-        all_messages[user] ||= []
-        all_messages[user].concat(messages) unless messages.nil? 
-      end
-
-      # There's no further pages, so return a message array.
-      if depth >= MAX_DEPTH_SINGLE || !comments.methods.include?(:next_page)
-        return all_messages
-      end
-
-      # There's a next page. Look for it recursively
-      next_page = comments.next_page
-      if next_page && !next_page.empty?
-        comments_recursive_multi all_messages, next_page, users, depth + 1
-      else
-        # There's no next page, so return the message array.
-        all_messages
       end
     end
 
