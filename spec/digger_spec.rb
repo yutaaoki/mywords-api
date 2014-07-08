@@ -76,8 +76,8 @@ describe MyWords::Digger do
       friends = friends_array @user_threads, USER_ID
       data  = @user_threads[0]['to']['data']
       users = [data[0]['id'],data[1]['id']]
-      all_messages = MyWords::Digger::all_messages_single graph, @user_threads[0], users
-      puts all_messages
+      all_messages = MyWords::Digger::all_messages_friend graph, @user_threads, users
+      #puts all_messages
       expect(all_messages.empty?).to eq(false)
       expect(all_messages.kind_of?(Hash)).to eq(true)
       expect(all_messages[USER_ID].length > 100).to eq(true)

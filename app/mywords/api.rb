@@ -46,6 +46,22 @@ module MyWords
           # Look for user messages in each thread
           all_messages graph, threads, user 
         end
+
+        get 'me/:friend' do
+          # Create a graph object
+          graph = _graph(params[:access_token])
+
+          # This will check if access_token is valid
+          me = login_user graph
+          friend = params[:friend]
+
+          # Get user inbox up to two pages
+          inboxes = all_inboxes graph, friend
+          threads = thread_array inboxes
+
+          # Look for messages for both me and friend
+          all_messages_friend graph, threads, [me, friend]
+        end
       end
 
       resource :friends do
@@ -57,7 +73,7 @@ module MyWords
           # Create a graph object
           graph = _graph(params[:access_token])
 
-          # This will check if access_token is valid
+          # This will check if the access token is valid
           user = login_user graph
 
           # Get user inbox up to two pages

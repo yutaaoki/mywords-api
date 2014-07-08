@@ -87,19 +87,23 @@ module MyWords
       }
     end
 
+    def all_messages_friend(graph, threads, users)
+      cache.cache("messages"+users[0]+"_"+users[1], :expires_in => 1.day){
+        all_messages = {}
+        threads.each do |thread|
+          comments = graph.get_connections(thread['id'], 'comments')
+          all_messages = comments_recursive all_messages, comments, users, 1, MAX_DEPTH_SINGLE
+        end
+        text_value all_messages
+      }
+    end
+
     def text_value(hash)
       result = {}
       hash.each do |key, value|
         result[key] = value.join " "
       end
       result
-    end
-
-    def all_messages_single(graph, thread, users)
-      all_messages = {}
-      comments = graph.get_connections(thread['id'], 'comments')
-      all_messages = comments_recursive all_messages, comments, users, 1, MAX_DEPTH_SINGLE
-      text_value all_messages
     end
 
     # Fetch comment objects recursively.
