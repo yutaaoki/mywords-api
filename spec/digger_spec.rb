@@ -13,8 +13,7 @@ describe MyWords::Digger do
 
   before(:each) do
     @inboxes = MyWords::Digger::all_inboxes graph, USER_ID
-    @threads = MyWords::Digger::thread_array @inboxes
-    @user_threads = MyWords::Digger::user_threads USER_ID, @threads
+    @user_threads = MyWords::Digger::user_threads @inboxes, USER_ID
   end
 
   describe 'login_user' do
@@ -28,16 +27,17 @@ describe MyWords::Digger do
     it 'returns all the inbox array' do
       expect(@inboxes.kind_of?(Array)).to eq(true)
       @inboxes.each do |box|
-        expect(box.kind_of?(Array)).to eq(true)
+        expect(box.kind_of?(Hash)).to eq(true)
       end
-      expect(@inboxes[0][0]['id'].kind_of?(String)).to eq(true)
+      expect(@inboxes[0]['id'].kind_of?(String)).to eq(true)
     end
   end
 
   describe 'thread_array' do
     it 'returns thread array' do
-      expect(@threads.kind_of?(Array)).to eq(true)
-      @threads.each do |t|
+      threads = MyWords::Digger::thread_array([[{}],[{}]]);
+      expect(threads.kind_of?(Array)).to eq(true)
+      threads.each do |t|
         expect(t.kind_of?(Hash)).to eq(true)
       end
     end

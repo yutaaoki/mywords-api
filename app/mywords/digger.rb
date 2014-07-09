@@ -37,6 +37,7 @@ module MyWords
         if next_page
           all.push next_page
         end
+        thread_array all
       }
     end
 
@@ -51,10 +52,10 @@ module MyWords
 
     # Filter out irrelevant threads based on
     # the user id.
-    def user_threads(login_user, inboxes)
+    def user_threads(inboxes, user)
       inboxes.select do |e|
         if e['to'] && e['to']['data']
-          contains = e['to']['data'].select { |d| d['id'] == login_user }
+          contains = e['to']['data'].select { |d| d['id'] == user }
           !contains.empty?
         else
           false

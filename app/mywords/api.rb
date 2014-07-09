@@ -41,7 +41,7 @@ module MyWords
 
           # Get user inbox up to two pages
           inboxes = all_inboxes graph, user
-          threads = thread_array inboxes
+          threads = user_threads inboxes, user
 
           # Look for user messages in each thread
           all_messages graph, threads, user 
@@ -56,8 +56,8 @@ module MyWords
           friend = params[:friend]
 
           # Get user inbox up to two pages
-          inboxes = all_inboxes graph, friend
-          threads = thread_array inboxes
+          inboxes = all_inboxes graph, me
+          threads = user_threads inboxes, friend
 
           # Look for messages for both me and friend
           all_messages_friend graph, threads, [me, friend]
@@ -78,9 +78,8 @@ module MyWords
 
           # Get user inbox up to two pages
           inboxes = all_inboxes graph, user
-          threads = thread_array inboxes
 
-          friends_array threads, user
+          friends_array inboxes, user
         end
       end
     # :api 
