@@ -70,16 +70,18 @@ module MyWords
           requires :access_token, type: String, desc: 'Facebook Access Token'
         end
         get 'me' do
-          # Create a graph object
-          graph = _graph(params[:access_token])
+          cache.cache("friend"+params[:access_token], :expires_in => 1.day){
+            # Create a graph object
+            graph = _graph(params[:access_token])
 
-          # This will check if the access token is valid
-          user = login_user graph
+            # This will check if the access token is valid
+            user = login_user graph
 
-          # Get user inbox up to two pages
-          inboxes = all_inboxes graph, user
+            # Get user inbox up to two pages
+            inboxes = all_inboxes graph, user
 
-          friends_array inboxes, user
+            friends_array inboxes, user
+          }
         end
       end
     # :api 

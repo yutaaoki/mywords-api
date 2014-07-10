@@ -2,9 +2,11 @@ module AppConfig
   APP_ID = ''
   APP_SECRET = ''
   MAX_COMMENTS = 1000
-  MAX_DEPTH = 15
+  MAX_DEPTH = 30
+  MAX_DEPTH_SINGLE = 100
 
   #Test
   ACCESS_TOKEN = ''
   USER_ID = ''
+  FRIEND_ID = ''
 end
