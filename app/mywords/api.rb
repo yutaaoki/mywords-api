@@ -12,6 +12,8 @@ module MyWords
     helpers Digger
     helpers AppConfig
     helpers do
+      # Create a graph object each time in order to
+      # verify the user.
       def _graph(access_token)
         Koala::Facebook::API.new access_token, AppConfig::APP_SECRET
       end
@@ -19,26 +21,70 @@ module MyWords
 
     resource :api do
 
+      # Welcome message
       get do
-        {message: "mywords api"}
+        {message: "MyWords API"}
       end
 
       resource :messages do
 
+        # Returns a json object containing a single string
+        # combining all the messages found.
         params do
           requires :access_token, type: String, desc: 'Facebook Access Token'
         end
-        get ':login_user' do
+        get 'me' do
+          # Create a graph object
           graph = _graph(params[:access_token])
-          user = params[:login_user]
+          # This will check if access_token is valid
+          user = login_user graph
+
+          # Get user inbox up to two pages
           inboxes = all_inboxes graph, user
-          threads = thread_array inboxes
-          messages = all_messages graph, threads, user 
-          text = messages.join " "
-          {data: text}
+          threads = user_threads inboxes, user
+
+          # Look for user messages in each thread
+          all_messages graph, threads, user 
+        end
+
+        get 'me/:friend' do
+          # Create a graph object
+          graph = _graph(params[:access_token])
+
+          # This will check if access_token is valid
+          me = login_user graph
+          friend = params[:friend]
+
+          # Get user inbox up to two pages
+          inboxes = all_inboxes graph, me
+          threads = user_threads inboxes, friend
+
+          # Look for messages for both me and friend
+          all_messages_friend graph, threads, [me, friend]
         end
       end
-    end
 
+      resource :friends do
+
+        params do
+          requires :access_token, type: String, desc: 'Facebook Access Token'
+        end
+        get 'me' do
+          cache.cache("friend"+params[:access_token], :expires_in => 1.day){
+            # Create a graph object
+            graph = _graph(params[:access_token])
+
+            # This will check if the access token is valid
+            user = login_user graph
+
+            # Get user inbox up to two pages
+            inboxes = all_inboxes graph, user
+
+            friends_array inboxes, user
+          }
+        end
+      end
+    # :api 
+    end
   end
 end
