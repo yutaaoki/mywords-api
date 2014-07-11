@@ -39,6 +39,6 @@ thin start -s1 --socket /tmp/thin.sock
 
 | Resource | Description|
 | ------------- |:-----|
-| GET friends/me | List of friends you have messaged with. |
-| GET api/messages/me | Your messages in a single string. |
-| GET api/messages/me/:login_user | You and your friend's messages in a single string. |
+| GET /friends/me | List of friends you have messaged with. |
+| GET /messages/me | Your messages in a single string. |
+| GET /messages/me/:login_user | You and your friend's messages in a single string. |
