@@ -5,7 +5,7 @@ mywords-api
 
 Copy config.rb.sample to config.rb. Edit the file to add necessary information.
 
-```
+```shell
 # Install dependencies
 bundle
 # Copy the config sample
@@ -19,7 +19,7 @@ You are good to go!
 
 ### Using rack up
 
-```
+```shell
 rackup config.ru
 ```
 
@@ -27,7 +27,7 @@ rackup config.ru
 
 Thin is "a Ruby web server that glues together 3 of the best Ruby libraries in web history." I like using thin with nginx.
 
-```
+```shell
 # Install thin
 gem install thin
 # Run the app
